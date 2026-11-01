@@ -1,0 +1,33 @@
+{
+  "name": "tcc-desktop",
+  "productName": "TCC 수입원가계산기",
+  "version": "1.0.0",
+  "description": "Trade Cost Calculator 데스크톱 앱",
+  "author": "PSFA (풍성에프에이)",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win nsis --x64 --publish never"
+  },
+  "devDependencies": {
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "kr.psfa.tcc",
+    "productName": "TCC 수입원가계산기",
+    "artifactName": "TCC-Setup-${version}.${ext}",
+    "directories": { "output": "dist", "buildResources": "build" },
+    "files": ["main.js", "preload.js", "offline.html", "config.json", "build/icon.png"],
+    "win": { "target": "nsis", "icon": "build/icon.png" },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "TCC 수입원가계산기"
+    }
+  }
+}

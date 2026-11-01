@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useAuth } from "./AuthProvider";
 
 export function LoginGate({ children }: { children: ReactNode }) {
   const { user, loading, login } = useAuth();
   const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+  useEffect(() => setIsDesktop(!!window.tccDesktop), []);
 
   if (loading) return <div className="center-msg">불러오는 중…</div>;
   if (user) return <>{children}</>;
@@ -16,16 +19,21 @@ export function LoginGate({ children }: { children: ReactNode }) {
         <div className="logo">TC</div>
         <h1>Trade Cost Calculator</h1>
         <p>수입 건별 원가를 계산하고 저장합니다.</p>
+        {isDesktop && <p className="login-hint">버튼을 누르면 기본 브라우저(Chrome·Edge)에서 Google 로그인 창이 열립니다. 로그인 후 이 앱으로 자동으로 돌아옵니다.</p>}
         {err && <div className="error-box">{err}</div>}
         <button
           type="button"
           className="btn primary"
+          disabled={busy}
           onClick={async () => {
             setErr("");
+            setBusy(true);
             try {
               await login();
             } catch (e) {
               setErr(e instanceof Error ? e.message : "로그인에 실패했습니다.");
+            } finally {
+              setBusy(false);
             }
           }}
         >
@@ -35,7 +43,7 @@ export function LoginGate({ children }: { children: ReactNode }) {
             <path fill="#fff" opacity=".7" d="M6.4 14c-.2-.6-.3-1.3-.3-2s.1-1.4.3-2V7.4H3.1a10 10 0 0 0 0 9.2L6.4 14z" />
             <path fill="#fff" opacity=".55" d="M12 5.9c1.5 0 2.8.5 3.8 1.5l2.9-2.9A10 10 0 0 0 3.1 7.4L6.4 10c.8-2.3 3-4.1 5.6-4.1z" />
           </svg>
-          Google 계정으로 로그인
+          {busy ? (isDesktop ? "브라우저에서 로그인을 완료하세요…" : "로그인 중…") : "Google 계정으로 로그인"}
         </button>
       </div>
     </main>

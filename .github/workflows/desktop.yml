@@ -1,0 +1,67 @@
+name: Desktop EXE (Windows)
+
+on:
+  workflow_dispatch:
+    inputs:
+      app_url:
+        description: "EXE가 띄울 웹 주소 (비우면 저장소 변수 TCC_URL 또는 desktop/config.json 사용)"
+        required: false
+        default: ""
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: desktop
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 웹 주소 설정
+        env:
+          INPUT_URL: ${{ github.event.inputs.app_url }}
+          VAR_URL: ${{ vars.TCC_URL }}
+        run: |
+          URL="${INPUT_URL:-$VAR_URL}"
+          if [ -n "$URL" ]; then
+            printf '{\n  "appUrl": "%s"\n}\n' "$URL" > config.json
+          fi
+          echo "연결 주소:"; cat config.json
+
+      - name: 버전 설정 (태그 v1.2.3 → 1.2.3)
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: npm version --no-git-tag-version "${GITHUB_REF_NAME#v}"
+
+      - name: 설치
+        run: npm install --no-audit --no-fund
+
+      - name: EXE 빌드
+        run: npm run dist
+
+      - name: Artifacts 업로드
+        uses: actions/upload-artifact@v4
+        with:
+          name: TCC-Setup
+          path: desktop/dist/*.exe
+          if-no-files-found: error
+
+      - name: Releases 업로드 (태그일 때)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: desktop/dist/*.exe
+          name: TCC 수입원가계산기 ${{ github.ref_name }}
+          body: |
+            Windows 설치 파일입니다. `TCC-Setup-*.exe`를 내려받아 실행하세요.
+            처음 실행 시 "Windows의 PC 보호" 창이 뜨면 **추가 정보 → 실행**을 누르세요 (코드 서명 전 단계).

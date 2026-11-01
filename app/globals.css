@@ -386,6 +386,7 @@ fieldset.lockable { border: 0; margin: 0; padding: 0; min-width: 0; }
 .login-card h1 { margin: 0 0 6px; font-size: 22px; }
 .login-card p { margin: 0 0 24px; color: var(--text-2); font-size: 13.5px; }
 .login-card .btn { width: 100%; justify-content: center; height: 44px; font-size: 14px; }
+.login-hint { font-size: 12.5px !important; color: var(--text-3) !important; background: var(--surface-2); border-radius: 8px; padding: 8px 10px; margin-top: -12px !important; }
 .center-msg { min-height: 60vh; display: grid; place-items: center; color: var(--text-3); }
 .error-box { background: var(--warn-soft); color: var(--warn); border-radius: 10px; padding: 12px 14px; font-size: 13px; margin-bottom: 16px; }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { onAuthStateChanged, signInWithPopup, signOut, type User } from "firebase/auth";
+import { GoogleAuthProvider, onAuthStateChanged, signInWithCredential, signInWithPopup, signOut, type User } from "firebase/auth";
 import { auth, googleProvider } from "@/lib/firebase";
 
 interface AuthState {
@@ -33,6 +33,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user,
     loading,
     login: async () => {
+      const desktop = typeof window !== "undefined" ? window.tccDesktop : undefined;
+      if (desktop) {
+        // EXE 앱: Google 은 앱 내장 창에서의 로그인을 막으므로 기본 브라우저에서 로그인한 뒤 토큰을 넘겨받습니다.
+        const { idToken, accessToken } = await desktop.login();
+        if (!idToken && !accessToken) throw new Error("로그인이 취소되었습니다.");
+        await signInWithCredential(auth(), GoogleAuthProvider.credential(idToken, accessToken));
+        return;
+      }
       await signInWithPopup(auth(), googleProvider);
     },
     logout: async () => {

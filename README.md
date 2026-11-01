@@ -33,6 +33,26 @@ Firebase 설정(psfa-meeting)은 `lib/firebase.ts`에 기본값으로 들어 있
 3. Deploy (환경변수는 선택 — 넣지 않으면 기본값 사용)
 4. 배포 후 생성된 도메인을 Firebase 승인된 도메인에 추가
 
+## 4. Windows 설치 파일(EXE)
+
+`desktop/` 폴더는 배포된 웹 주소를 띄우는 Electron 앱입니다. Google은 앱 내장 창에서의 로그인을 막기 때문에,
+로그인 버튼을 누르면 **기본 브라우저(Chrome·Edge)** 에서 `/desktop-login` 페이지가 열리고, 로그인 후 토큰이
+이 PC의 `127.0.0.1` 임시 주소로만 전달되어 앱이 로그인됩니다.
+
+**빌드 (GitHub Actions — PC에 도구 설치 불필요)**
+1. 웹을 Vercel에 먼저 배포하고 주소를 확인합니다.
+2. GitHub 저장소 → Settings → Secrets and variables → Actions → **Variables** 에 `TCC_URL` = 배포 주소 (예: `https://psfa-tcc.vercel.app`)
+   - 또는 `desktop/config.json` 의 `appUrl` 을 수정
+3. 실행 방법 둘 중 하나
+   - **수동:** Actions → *Desktop EXE (Windows)* → Run workflow → 완료 후 **Artifacts** 에서 `TCC-Setup` 다운로드
+   - **릴리스:** `git tag v1.0.0 && git push origin v1.0.0` → **Releases** 에 `TCC-Setup-1.0.0.exe` 자동 업로드
+4. 설치 파일은 코드 서명 전이라 처음 실행 시 "Windows의 PC 보호" 창이 뜹니다 → **추가 정보 → 실행**
+
+**로컬 실행 (선택)**: `cd desktop && npm install && npm start` (빌드: `npm run dist`)
+
+화면은 웹을 그대로 띄우므로 **웹을 다시 배포하면 EXE를 새로 설치하지 않아도 바로 반영**됩니다.
+EXE를 다시 만들어야 하는 건 `desktop/` 폴더(아이콘, 메뉴, 연결 주소)를 바꿨을 때뿐입니다.
+
 ## 구조
 
 ```
@@ -52,6 +72,9 @@ lib/
   shipments.ts             Firestore CRUD (users/{uid}/shipments)
   excel.ts                 원가 계산서 .xlsx 내보내기 (ExcelJS)
 firestore.rules            보안 규칙 (본인 데이터만 접근)
+app/desktop-login/         EXE 앱용 외부 브라우저 로그인 페이지
+desktop/                   Electron 앱 (main.js · preload.js · config.json · build/icon.png)
+.github/workflows/desktop.yml  Windows EXE 자동 빌드
 ```
 
 ## 계산 규칙
